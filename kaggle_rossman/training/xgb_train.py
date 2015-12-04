@@ -35,7 +35,7 @@ params = {"objective": "reg:linear",
           "silent": 1,
           "seed": 1301
           }
-num_boost_round = 1000
+num_boost_round = 700
 
 print "features are: " + str(features)
 print("Train a XGBoost model")
