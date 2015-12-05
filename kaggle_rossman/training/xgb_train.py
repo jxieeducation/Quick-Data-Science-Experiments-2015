@@ -114,7 +114,7 @@ params = {"objective": "reg:linear",
           "silent": 1,
           "seed": 1337
           }
-num_boost_round = 280
+num_boost_round = 318
 
 print("Train a XGBoost model")
 X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
@@ -139,11 +139,3 @@ test_probs = gbm.predict(dtest)
 # Make Submission
 result = pd.DataFrame({"Id": test["Id"], 'Sales': np.expm1(test_probs)})
 result.to_csv("../data/xgboost_submission.csv", index=False)
-
-# XGB feature importances
-# Based on https://www.kaggle.com/mmueller/liberty-mutual-group-property-inspection-prediction/xgb-feature-importance-python/code
-
-create_feature_map(features)
-importance = gbm.get_fscore(fmap='xgb.fmap')
-importance = sorted(importance.items(), key=operator.itemgetter(1))
-print importance
