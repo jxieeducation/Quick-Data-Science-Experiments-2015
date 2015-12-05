@@ -119,7 +119,14 @@ modelResults['rf'] = yhat
 
 ######### adjust weights
 results = {}
-modelWeights = {"xgb":[0.7, 0.75, 0.8, 0.85, 0.9, 0.95], "rf": [0.3, 0.25, 0.2, 0.15, 0.1, 0.05]}
+xgb_weights, rf_weights = [], []
+for i in range(20):
+	xgb_weight = i * 0.03
+	rf_weight = 1 - xgb_weight
+	xgb_weights += [xgb_weights]
+	rf_wights += rf_weight
+modelWeights = {"xgb":xgb_weights, "rf": rf_wights}
+
 for i in range(len(modelWeights.values()[0])):
 	identity = ""
 	totalPrediction = np.zeros(yhat.shape)
@@ -129,5 +136,6 @@ for i in range(len(modelWeights.values()[0])):
 	error = rmspe(X_valid.Sales.values, np.expm1(totalPrediction))
 	print('RMSPE: {:.6f}'.format(error))
 	results[identity] = error
-print "\n\nfinal results: " + str(results)
 
+results = sorted(results.items(), key=operator.itemgetter(1))
+print "\n\nfinal results: " + str(results)
