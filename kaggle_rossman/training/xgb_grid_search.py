@@ -116,8 +116,8 @@ def getError(maxDepth, num_round):
     error = rmspe(X_valid.Sales.values, np.expm1(yhat))
     return error
 
-maxDepths = [12, 14, 16]
-rounds = [250, 300, 350]
+maxDepths = [9, 10, 11, 12]
+rounds = [300]
 results = {}
 
 for maxDepth in maxDepths:
