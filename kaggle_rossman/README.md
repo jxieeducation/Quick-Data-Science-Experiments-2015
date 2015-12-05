@@ -1,7 +1,10 @@
 Kaggle Rossman
 
-to run:
-ipython notebook
+ensemble potentials:
+- RF model
+- keras NN
+- logistic
+- 
 
 
 http://stackoverflow.com/questions/15021521/how-to-encode-a-categorical-variable-in-sklearn
