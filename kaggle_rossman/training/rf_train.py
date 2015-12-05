@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.cross_validation import train_test_split
 import operator
 from sklearn.ensemble import RandomForestRegressor
-import pickle
+import cPickle as pickle
 
 def create_feature_map(features):
     outfile = open('xgb.fmap', 'w')
@@ -111,10 +111,10 @@ print('starting RF')
 # criterion='mse' - 0.125717
 clf = RandomForestRegressor(n_jobs=-1, verbose=3, n_estimators=100, random_state=1337)
 clf.fit(X_train[features].values, y_train)
-pickle.dump(clf, open("../data/rf.model", 'wb'))
 
 print("Validating")
 yhat = clf.predict(X_valid[features].values)
+pickle.dump(yhat, open('../data/rf_valid', 'wb'))
 error = rmspe(X_valid.Sales.values, np.expm1(yhat))
 print('RMSPE: {:.6f}'.format(error))
 

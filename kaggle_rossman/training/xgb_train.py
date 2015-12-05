@@ -6,6 +6,7 @@ import operator
 import matplotlib
 matplotlib.use("Agg") #Needed to save figures
 import matplotlib.pyplot as plt
+import cPickle as pickle
 
 def create_feature_map(features):
     outfile = open('xgb.fmap', 'w')
@@ -130,6 +131,7 @@ gbm.save_model("../data/xgb.model")
 
 print("Validating")
 yhat = gbm.predict(xgb.DMatrix(X_valid[features]))
+pickle.dump(yhat, open('../data/xgb_valid', 'wb'))
 error = rmspe(X_valid.Sales.values, np.expm1(yhat))
 print('RMSPE: {:.6f}'.format(error))
 

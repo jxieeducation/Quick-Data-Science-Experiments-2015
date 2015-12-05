@@ -3,8 +3,7 @@ import numpy as np
 from sklearn.cross_validation import train_test_split
 import operator
 from sklearn.ensemble import RandomForestRegressor
-import pickle
-import xgboost as xgb
+import cPickle as pickle
 
 def create_feature_map(features):
     outfile = open('xgb.fmap', 'w')
@@ -104,22 +103,31 @@ print(features)
 
 print('training data processed')
 X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
+y_train = np.log1p(X_train.Sales)
 y_valid = np.log1p(X_valid.Sales)
 
 ######### load models and validation predictions
 modelResults = {}
 # load xgb stuff
-gbm = xgb.load_model("../data/xgb.model")
-yhat = gbm.predict(xgb.DMatrix(X_valid[features]))
+print "loading xgb"
+yhat = pickle.load("'../data/xgb_valid'")
 modelResults['xgb'] = yhat
 # load sklearn tf stuff 
-clf = pickle.load("../data/rf.model")
-yhat = clf.predict(X_valid[features].values)
+print "loading rf"
+yhat = pickle.load("'../data/rf_valid'")
 modelResults['rf'] = yhat
 
 ######### adjust weights
-# modelWeights = {"xgb":0.8, "rf": 0.2}
-# totalPrediction = 
-
-print yhat.shape
+results = {}
+modelWeights = {"xgb":[0.7, 0.75, 0.8, 0.85, 0.9, 0.95], "rf": [0.3, 0.25, 0.2, 0.15, 0.1, 0.05]}
+for i in range(len(modelWeights.values()[0])):
+	identity = ""
+	totalPrediction = np.zeros(yhat.shape)
+	for name in modelResults.keys():
+		identity += name + "_" + str(modelWeights[name][i]) + ";"
+		totalPrediction += modelWeights[name][i] * modelResults[name]
+	error = rmspe(X_valid.Sales.values, np.expm1(totalPrediction))
+	print('RMSPE: {:.6f}'.format(error))
+	results[identity] = error
+print "\n\nfinal results: " + str(results)
 
