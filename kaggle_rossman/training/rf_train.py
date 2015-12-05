@@ -1,11 +1,9 @@
 import pandas as pd
 import numpy as np
 from sklearn.cross_validation import train_test_split
-import xgboost as xgb
 import operator
-import matplotlib
-matplotlib.use("Agg") #Needed to save figures
-import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
+import pickle
 
 def create_feature_map(features):
     outfile = open('xgb.fmap', 'w')
@@ -105,42 +103,22 @@ print(features)
 
 print('training data processed')
 
-params = {"objective": "reg:linear",
-          "booster" : "gbtree",
-          "eta": 0.3,
-          "max_depth": 12,
-          "subsample": 0.9,
-          "colsample_bytree": 0.7,
-          "silent": 1,
-          "seed": 1337
-          }
-num_boost_round = 280
-
-print("Train a XGBoost model")
 X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
 y_train = np.log1p(X_train.Sales)
 y_valid = np.log1p(X_valid.Sales)
-dtrain = xgb.DMatrix(X_train[features], y_train)
-dvalid = xgb.DMatrix(X_valid[features], y_valid)
 
-watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
-gbm = xgb.train(params, dtrain, num_boost_round, evals=watchlist, \
-  early_stopping_rounds=100, feval=rmspe_xg, verbose_eval=True)
-gbm.save_model("../data/xgb.model")
+print('starting RF')
+# criterion='mse' - 0.125717
+clf = RandomForestRegressor(n_jobs=-1, verbose=3, n_estimators=100, random_state=1337)
+clf.fit(X_train[features].values, y_train)
+pickle.dump(clf, open("../data/rf.model", 'wb'))
 
 print("Validating")
-yhat = gbm.predict(xgb.DMatrix(X_valid[features]))
+yhat = clf.predict(X_valid[features].values)
 error = rmspe(X_valid.Sales.values, np.expm1(yhat))
 print('RMSPE: {:.6f}'.format(error))
 
 print("Make predictions on the test set")
-dtest = xgb.DMatrix(test[features])
-test_probs = gbm.predict(dtest)
-# Make Submission
+test_probs = clf.predict(test[features])
 result = pd.DataFrame({"Id": test["Id"], 'Sales': np.expm1(test_probs)})
-result.to_csv("../data/xgboost_submission.csv", index=False)
-
-create_feature_map(features)
-importance = gbm.get_fscore(fmap='xgb.fmap')
-importance = sorted(importance.items(), key=operator.itemgetter(1))
-print importance
+result.to_csv("../data/rf_submission.csv", index=False)
