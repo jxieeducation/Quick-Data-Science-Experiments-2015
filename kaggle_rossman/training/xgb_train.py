@@ -131,7 +131,7 @@ params = {"objective": "reg:linear",
           "silent": 1,
           "seed": 1337
           }
-num_boost_round = 318
+num_boost_round = 280
 
 print("Train a XGBoost model")
 X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
