@@ -110,22 +110,23 @@ y_valid = np.log1p(X_valid.Sales)
 modelResults = {}
 # load xgb stuff
 print "loading xgb"
-yhat = pickle.load("'../data/xgb_valid'")
+yhat = pickle.load(open("../data/xgb_valid"))
 modelResults['xgb'] = yhat
 # load sklearn tf stuff 
 print "loading rf"
-yhat = pickle.load("'../data/rf_valid'")
+yhat = pickle.load(open("../data/rf_valid"))
 modelResults['rf'] = yhat
 
 ######### adjust weights
 results = {}
 xgb_weights, rf_weights = [], []
-for i in range(20):
-	xgb_weight = i * 0.03
+step = 0.02
+for i in range(int(1/step)):
+	xgb_weight = i * step
 	rf_weight = 1 - xgb_weight
-	xgb_weights += [xgb_weights]
-	rf_wights += rf_weight
-modelWeights = {"xgb":xgb_weights, "rf": rf_wights}
+	xgb_weights += [xgb_weight]
+	rf_weights += [rf_weight]
+modelWeights = {"xgb":xgb_weights, "rf": rf_weights}
 
 for i in range(len(modelWeights.values()[0])):
 	identity = ""

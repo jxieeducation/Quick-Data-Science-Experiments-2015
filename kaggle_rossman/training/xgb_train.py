@@ -22,13 +22,28 @@ def rmspe_xg(yhat, y):
     yhat = np.expm1(yhat)
     return "rmspe", rmspe(y,yhat)
 
-# Gather some features
+def build_features_store(store, train):
+    store['Sales25th'] = 0
+    store['Sales50th'] = 0
+    store['Sales75th'] = 0
+    store['SalesMedian'] = 0
+    for store_id in train.Store.unique():
+        Sales25th = train[train.Store == store_id].Sales.quantile(0.25)
+        Sales50th = train[train.Store == store_id].Sales.quantile(0.50)
+        Sales75th = train[train.Store == store_id].Sales.quantile(0.75)
+        SalesMedian = train[train.Store == store_id].Sales.median()
+
+        store.loc[store.Store == store_id, 'Sales25th'] = Sales25th
+        store.loc[store.Store == store_id, 'Sales50th'] = Sales50th
+        store.loc[store.Store == store_id, 'Sales75th'] = Sales75th
+        store.loc[store.Store == store_id, 'SalesMedian'] = SalesMedian
+
 def build_features(features, data):
     # remove NaNs
     data.fillna(0, inplace=True)
     data.loc[data.Open.isnull(), 'Open'] = 1
     # Use some properties directly
-    features.extend(['Store', 'CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
+    features.extend(['Store', 'CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday', 'Sales25th', 'Sales50th', 'Sales75th', 'SalesMedian'])
 
     # Label encode some features
     features.extend(['StoreType', 'Assortment', 'StateHoliday'])
@@ -83,6 +98,7 @@ types = {'CompetitionOpenSinceYear': np.dtype(int),
 train = pd.read_csv("../data/train.csv", parse_dates=[2], dtype=types)
 test = pd.read_csv("../data/test.csv", parse_dates=[3], dtype=types)
 store = pd.read_csv("../data/store.csv")
+build_features_store(store, train)
 
 print("Assume store open, if not provided")
 train.fillna(1, inplace=True)
