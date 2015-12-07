@@ -1,8 +1,9 @@
 import pandas as pd
 import numpy as np
 from sklearn.cross_validation import train_test_split
-import xgboost as xgb
 import operator
+from sklearn.ensemble import ExtraTreesRegressor
+import cPickle as pickle
 
 def create_feature_map(features):
     outfile = open('xgb.fmap', 'w')
@@ -116,40 +117,26 @@ build_features(features, train)
 build_features([], test)
 print(features)
 
+
+print('training data processed')
+
 X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
 y_train = np.log1p(X_train.Sales)
 y_valid = np.log1p(X_valid.Sales)
-dtrain = xgb.DMatrix(X_train[features], y_train)
-dvalid = xgb.DMatrix(X_valid[features], y_valid)
-watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
 
-def getError(maxDepth, num_round, eta):
-    params = {"objective": "reg:linear",
-        "booster" : "gbtree",
-        "eta": eta,
-        "max_depth": maxDepth,
-        "subsample": 0.9,
-        "colsample_bytree": 0.7,
-        "silent": 1,
-        "seed": 1337
-        }
-    num_boost_round = num_round
+print('starting ExtraTree')
+clf = ExtraTreesRegressor(n_jobs=-1, verbose=3, n_estimators=100, random_state=1337)
+clf.fit(X_train[features].values, y_train)
 
-    gbm = xgb.train(params, dtrain, num_boost_round, evals=watchlist, \
-        early_stopping_rounds=100, feval=rmspe_xg, verbose_eval=True)
-    yhat = gbm.predict(xgb.DMatrix(X_valid[features]))
-    error = rmspe(X_valid.Sales.values, np.expm1(yhat))
-    return error
+print("Validating")
+yhat = clf.predict(X_valid[features].values)
+pickle.dump(yhat, open('../data/et_valid', 'wb'))
+error = rmspe(X_valid.Sales.values, np.expm1(yhat))
+print('RMSPE: {:.6f}'.format(error))
 
-maxDepths = [11, 12, 13]
-rounds = [400]
-etas = [0.2, 0.3, 0.4]
-results = {}
+print("Make predictions on the test set")
+test_probs = clf.predict(test[features])
+result = pd.DataFrame({"Id": test["Id"], 'Sales': np.expm1(test_probs)})
+result.to_csv("../data/et_submission.csv", index=False)
 
-for maxDepth in maxDepths:
-    for num_round in rounds:
-        for eta in etas:
-            print "currently: maxdepth->" + str(maxDepth) + " num_round->" + str(num_round) + " eta->" + str(eta)
-            results[str(maxDepth) + "_" + str(num_round) + "_" + str(eta)] = getError(maxDepth, num_round, eta) 
-
-print results
+# 0.104902

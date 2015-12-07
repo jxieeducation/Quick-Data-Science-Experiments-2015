@@ -116,17 +116,26 @@ modelResults['xgb'] = yhat
 print "loading rf"
 yhat = pickle.load(open("../data/rf_valid"))
 modelResults['rf'] = yhat
+# load sklearn extratree stff
+print "loading extratree"
+yhat = pickle.load(open("../data/et_valid"))
+modelResults['et'] = yhat
 
 ######### adjust weights
 results = {}
-xgb_weights, rf_weights = [], []
-step = 0.02
+xgb_weights, rf_weights, et_weights = [], [], []
+step = 0.01
 for i in range(int(1/step)):
-	xgb_weight = i * step
-	rf_weight = 1 - xgb_weight
-	xgb_weights += [xgb_weight]
-	rf_weights += [rf_weight]
-modelWeights = {"xgb":xgb_weights, "rf": rf_weights}
+    xgb_weight = i * step
+    for j in range(int(1/step)):
+        rf_weight = j * step
+        et_weight = 1 - xgb_weight - rf_weight
+        if et_weight >= 0:
+            xgb_weights += [xgb_weight]
+            rf_weights += [rf_weight]
+            et_weights += [et_weight]
+
+modelWeights = {"xgb":xgb_weights, "rf": rf_weights, "et": et_weights}
 
 for i in range(len(modelWeights.values()[0])):
 	identity = ""
@@ -139,4 +148,4 @@ for i in range(len(modelWeights.values()[0])):
 	results[identity] = error
 
 results = sorted(results.items(), key=operator.itemgetter(1))
-print "\n\nfinal results: " + str(results)
+print "\n\nfinal results: " + str(results[:15])
