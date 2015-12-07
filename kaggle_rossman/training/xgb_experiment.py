@@ -8,12 +8,6 @@ matplotlib.use("Agg") #Needed to save figures
 import matplotlib.pyplot as plt
 import cPickle as pickle
 
-def create_feature_map(features):
-    outfile = open('xgb.fmap', 'w')
-    for i, feat in enumerate(features):
-        outfile.write('{0}\t{1}\tq\n'.format(i, feat))
-    outfile.close()
-
 def rmspe(y, yhat):
     return np.sqrt(np.mean((yhat/y-1) ** 2))
 
@@ -116,9 +110,6 @@ params = {"objective": "reg:linear",
           "seed": 1337
           }
 num_boost_round = 1000
-# 12_20=train-rmspe:0.103435   eval-rmspe:0.104899
-# 13_20=train-rmspe:0.094997   eval-rmspe:0.101080
-# 10_20=train-rmspe:0.136887    eval-rmspe:0.113438
 
 print("Train a XGBoost model")
 X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
