@@ -83,7 +83,7 @@ train = pd.read_csv("../data/train.csv", parse_dates=[2], dtype=types)
 test = pd.read_csv("../data/test.csv", parse_dates=[3], dtype=types)
 store = pd.read_csv("../data/store_features.pd")
 for feature in store.columns:
-    if '_' in store :
+    if '_' in feature:
         features += [feature]
 
 print("Assume store open, if not provided")
@@ -109,13 +109,16 @@ print('training data processed')
 params = {"objective": "reg:linear",
           "booster" : "gbtree",
           "eta": 0.3,
-          "max_depth": 12,
+          "max_depth": 10,
           "subsample": 0.9,
           "colsample_bytree": 0.7,
           "silent": 1,
           "seed": 1337
           }
-num_boost_round = 400
+num_boost_round = 1000
+# 12_20=train-rmspe:0.103435   eval-rmspe:0.104899
+# 13_20=train-rmspe:0.094997   eval-rmspe:0.101080
+# 10_20=train-rmspe:0.136887    eval-rmspe:0.113438
 
 print("Train a XGBoost model")
 X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
@@ -131,6 +134,7 @@ gbm.save_model("../data/xgb.model")
 
 print("Validating")
 yhat = gbm.predict(xgb.DMatrix(X_valid[features]))
+pickle.dump(yhat, open('../data/xgb_valid', 'wb'))
 error = rmspe(X_valid.Sales.values, np.expm1(yhat))
 print('RMSPE: {:.6f}'.format(error))
 
@@ -139,4 +143,4 @@ dtest = xgb.DMatrix(test[features])
 test_probs = gbm.predict(dtest)
 # Make Submission
 result = pd.DataFrame({"Id": test["Id"], 'Sales': np.expm1(test_probs)})
-result.to_csv("../data/xgboost_exp_submission.csv", index=False)
+result.to_csv("../data/xgboost_submission.csv", index=False)

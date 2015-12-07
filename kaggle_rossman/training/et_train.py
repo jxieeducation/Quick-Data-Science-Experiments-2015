@@ -5,12 +5,6 @@ import operator
 from sklearn.ensemble import ExtraTreesRegressor
 import cPickle as pickle
 
-def create_feature_map(features):
-    outfile = open('xgb.fmap', 'w')
-    for i, feat in enumerate(features):
-        outfile.write('{0}\t{1}\tq\n'.format(i, feat))
-    outfile.close()
-
 def rmspe(y, yhat):
     return np.sqrt(np.mean((yhat/y-1) ** 2))
 
@@ -19,28 +13,12 @@ def rmspe_xg(yhat, y):
     yhat = np.expm1(yhat)
     return "rmspe", rmspe(y,yhat)
 
-def build_features_store(store, train):
-    store['Sales25th'] = 0
-    store['Sales50th'] = 0
-    store['Sales75th'] = 0
-    store['SalesMedian'] = 0
-    for store_id in train.Store.unique():
-        Sales25th = train[train.Store == store_id].Sales.quantile(0.25)
-        Sales50th = train[train.Store == store_id].Sales.quantile(0.50)
-        Sales75th = train[train.Store == store_id].Sales.quantile(0.75)
-        SalesMedian = train[train.Store == store_id].Sales.median()
-
-        store.loc[store.Store == store_id, 'Sales25th'] = Sales25th
-        store.loc[store.Store == store_id, 'Sales50th'] = Sales50th
-        store.loc[store.Store == store_id, 'Sales75th'] = Sales75th
-        store.loc[store.Store == store_id, 'SalesMedian'] = SalesMedian
-
 def build_features(features, data):
     # remove NaNs
     data.fillna(0, inplace=True)
     data.loc[data.Open.isnull(), 'Open'] = 1
     # Use some properties directly
-    features.extend(['Store', 'CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday', 'Sales25th', 'Sales50th', 'Sales75th', 'SalesMedian'])
+    features.extend(['Store', 'CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
 
     # Label encode some features
     features.extend(['StoreType', 'Assortment', 'StateHoliday'])
@@ -84,8 +62,8 @@ def build_features(features, data):
 
 
 ## Start of main script
-
 print("Load the training, test and store data using pandas")
+features = []
 types = {'CompetitionOpenSinceYear': np.dtype(int),
          'CompetitionOpenSinceMonth': np.dtype(int),
          'StateHoliday': np.dtype(str),
@@ -94,8 +72,10 @@ types = {'CompetitionOpenSinceYear': np.dtype(int),
          'PromoInterval': np.dtype(str)}
 train = pd.read_csv("../data/train.csv", parse_dates=[2], dtype=types)
 test = pd.read_csv("../data/test.csv", parse_dates=[3], dtype=types)
-store = pd.read_csv("../data/store.csv")
-build_features_store(store, train)
+store = pd.read_csv("../data/store_features.pd")
+for feature in store.columns:
+    if '_' in feature:
+        features += [feature]
 
 print("Assume store open, if not provided")
 train.fillna(1, inplace=True)
@@ -110,13 +90,10 @@ print("Join with store")
 train = pd.merge(train, store, on='Store')
 test = pd.merge(test, store, on='Store')
 
-features = []
-
 print("augment features")
 build_features(features, train)
 build_features([], test)
 print(features)
-
 
 print('training data processed')
 
