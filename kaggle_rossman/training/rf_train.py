@@ -18,7 +18,7 @@ def build_features(features, data):
     data.fillna(0, inplace=True)
     data.loc[data.Open.isnull(), 'Open'] = 1
     # Use some properties directly
-    features.extend(['Store', 'CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
+    features.extend(['Store','CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
 
     # Label encode some features
     features.extend(['StoreType', 'Assortment', 'StateHoliday'])
@@ -97,12 +97,12 @@ print(features)
 
 print('training data processed')
 
-X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
+X_train, X_valid = train_test_split(train, test_size=0.025, random_state=1337)
 y_train = np.log1p(X_train.Sales)
 y_valid = np.log1p(X_valid.Sales)
 
 print('starting RF')
-# criterion='mse' - 0.125717
+features = [f for f in features if f != 'Store']
 clf = RandomForestRegressor(n_jobs=-1, verbose=3, n_estimators=100, random_state=1337)
 clf.fit(X_train[features].values, y_train)
 
@@ -116,3 +116,6 @@ print("Make predictions on the test set")
 test_probs = clf.predict(test[features])
 result = pd.DataFrame({"Id": test["Id"], 'Sales': np.expm1(test_probs)})
 result.to_csv("../data/rf_submission.csv", index=False)
+
+# store - 0.105562
+# without - 0.105431
