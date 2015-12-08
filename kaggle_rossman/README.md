@@ -13,3 +13,4 @@ https://www.kaggle.com/vinhnguyen/rossmann-store-sales/evolutionary-algorithms-f
 https://www.kaggle.com/c/rossmann-store-sales/forums/t/17468/question-xgboost-and-stacking
 
 https://www.kaggle.com/c/rossmann-store-sales/forums/t/17387/inputs-on-feature-engineering-for-store-prediction-regression-challenges/99170
+http://www.slideshare.net/odsc/owen-zhangopen-sourcetoolsanddscompetitions1
