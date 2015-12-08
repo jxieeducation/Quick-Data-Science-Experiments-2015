@@ -21,7 +21,7 @@ def build_features(features, data):
     data.fillna(0, inplace=True)
     data.loc[data.Open.isnull(), 'Open'] = 1
     # Use some properties directly
-    features.extend(['CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
+    features.extend(['Store', 'CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
 
     # Label encode some features
     features.extend(['StoreType', 'Assortment', 'StateHoliday'])
@@ -110,9 +110,11 @@ params = {"objective": "reg:linear",
           "silent": 1,
           "seed": 1337
           }
-num_boost_round = 73
+# num_boost_round = 73
+num_boost_round = 200
 
-
+# original
+# eta=0.35, depth=11, min_child=1.1
 # [11]  train-rmspe:0.191163  eval-rmspe:0.134395
 # [12]  train-rmspe:0.187263  eval-rmspe:0.128288
 # [13]  train-rmspe:0.185512  eval-rmspe:0.124439
@@ -175,6 +177,98 @@ num_boost_round = 73
 # [70]  train-rmspe:0.131571  eval-rmspe:0.099159
 # [71]  train-rmspe:0.114509  eval-rmspe:0.099056
 # [72]  train-rmspe:0.114237  eval-rmspe:0.098882
+
+# added store
+# [42]  train-rmspe:0.115287  eval-rmspe:0.100869
+# [43]  train-rmspe:0.115182  eval-rmspe:0.100791
+# [44]  train-rmspe:0.114926  eval-rmspe:0.100784
+# [45]  train-rmspe:0.114618  eval-rmspe:0.100676
+# [46]  train-rmspe:0.113982  eval-rmspe:0.100622
+# [47]  train-rmspe:0.113034  eval-rmspe:0.099769
+# [48]  train-rmspe:0.112561  eval-rmspe:0.099486
+# [49]  train-rmspe:0.112286  eval-rmspe:0.099286
+# [50]  train-rmspe:0.112274  eval-rmspe:0.099283
+# [51]  train-rmspe:0.112123  eval-rmspe:0.099244
+# [52]  train-rmspe:0.111837  eval-rmspe:0.099207
+# [53]  train-rmspe:0.111097  eval-rmspe:0.098792
+# [54]  train-rmspe:0.110567  eval-rmspe:0.098462
+# [55]  train-rmspe:0.110503  eval-rmspe:0.098456
+# [56]  train-rmspe:0.110309  eval-rmspe:0.098357
+# [57]  train-rmspe:0.110198  eval-rmspe:0.098282
+# [58]  train-rmspe:0.109666  eval-rmspe:0.097941
+# [59]  train-rmspe:0.109390  eval-rmspe:0.097787
+# [60]  train-rmspe:0.109278  eval-rmspe:0.097691
+# [61]  train-rmspe:0.108907  eval-rmspe:0.097624
+# [62]  train-rmspe:0.108604  eval-rmspe:0.097438
+# [63]  train-rmspe:0.108465  eval-rmspe:0.097351
+# [64]  train-rmspe:0.107837  eval-rmspe:0.096968
+# [65]  train-rmspe:0.101680  eval-rmspe:0.097094
+# [66]  train-rmspe:0.101215  eval-rmspe:0.096996
+# [67]  train-rmspe:0.101105  eval-rmspe:0.096889
+# [68]  train-rmspe:0.100764  eval-rmspe:0.096762
+# [69]  train-rmspe:0.100489  eval-rmspe:0.096715
+# [70]  train-rmspe:0.096814  eval-rmspe:0.096459
+# [71]  train-rmspe:0.096586  eval-rmspe:0.096215
+# [72]  train-rmspe:0.096309  eval-rmspe:0.096811
+# [73]  train-rmspe:0.096064  eval-rmspe:0.096726
+# [74]  train-rmspe:0.095996  eval-rmspe:0.096682
+# [75]  train-rmspe:0.095911  eval-rmspe:0.096643
+# [76]  train-rmspe:0.095663  eval-rmspe:0.096630
+# [77]  train-rmspe:0.095581  eval-rmspe:0.096601
+# [78]  train-rmspe:0.095458  eval-rmspe:0.096578
+# [79]  train-rmspe:0.095223  eval-rmspe:0.096618
+# [80]  train-rmspe:0.094980  eval-rmspe:0.096561
+# [81]  train-rmspe:0.094566  eval-rmspe:0.096440
+# [82]  train-rmspe:0.094207  eval-rmspe:0.096329
+# [83]  train-rmspe:0.094176  eval-rmspe:0.096309
+# [84]  train-rmspe:0.094170  eval-rmspe:0.096299
+# [85]  train-rmspe:0.093980  eval-rmspe:0.096254
+# [86]  train-rmspe:0.093864  eval-rmspe:0.096182
+# [87]  train-rmspe:0.093807  eval-rmspe:0.096109
+# [88]  train-rmspe:0.093799  eval-rmspe:0.096107
+# [89]  train-rmspe:0.093499  eval-rmspe:0.096039
+# [90]  train-rmspe:0.093243  eval-rmspe:0.095985
+# [91]  train-rmspe:0.093184  eval-rmspe:0.095965
+# [92]  train-rmspe:0.093014  eval-rmspe:0.095942
+# [93]  train-rmspe:0.092984  eval-rmspe:0.095937
+# [94]  train-rmspe:0.092575  eval-rmspe:0.095881
+# [95]  train-rmspe:0.092372  eval-rmspe:0.095822
+# [96]  train-rmspe:0.092319  eval-rmspe:0.095792
+# [97]  train-rmspe:0.092262  eval-rmspe:0.095723
+# [98]  train-rmspe:0.091823  eval-rmspe:0.095564
+# [99]  train-rmspe:0.091725  eval-rmspe:0.095544
+# [100] train-rmspe:0.091512  eval-rmspe:0.095499
+# [101] train-rmspe:0.091491  eval-rmspe:0.095502
+# [102] train-rmspe:0.091283  eval-rmspe:0.095450
+# [103] train-rmspe:0.091203  eval-rmspe:0.095396
+# [104] train-rmspe:0.091129  eval-rmspe:0.095366
+# [105] train-rmspe:0.091038  eval-rmspe:0.095343
+# [106] train-rmspe:0.090990  eval-rmspe:0.095356
+# [107] train-rmspe:0.090967  eval-rmspe:0.095322
+# [108] train-rmspe:0.090808  eval-rmspe:0.095345
+# [109] train-rmspe:0.090783  eval-rmspe:0.095441
+# [110] train-rmspe:0.090672  eval-rmspe:0.095428
+# [111] train-rmspe:0.090610  eval-rmspe:0.095405
+# [112] train-rmspe:0.090517  eval-rmspe:0.095364
+# [113] train-rmspe:0.090373  eval-rmspe:0.095315
+# [114] train-rmspe:0.090262  eval-rmspe:0.095277
+# [115] train-rmspe:0.089834  eval-rmspe:0.095210
+# [116] train-rmspe:0.089736  eval-rmspe:0.095205
+# [117] train-rmspe:0.089659  eval-rmspe:0.095146
+# [118] train-rmspe:0.089497  eval-rmspe:0.095188
+# [119] train-rmspe:0.089368  eval-rmspe:0.095164
+# [120] train-rmspe:0.089098  eval-rmspe:0.095005
+# [121] train-rmspe:0.088948  eval-rmspe:0.094966
+# [122] train-rmspe:0.088753  eval-rmspe:0.094934
+# [123] train-rmspe:0.088690  eval-rmspe:0.094923
+# [124] train-rmspe:0.088564  eval-rmspe:0.094904
+# [125] train-rmspe:0.088388  eval-rmspe:0.094870
+# [126] train-rmspe:0.088233  eval-rmspe:0.094817
+# [127] train-rmspe:0.088047  eval-rmspe:0.094783
+# [128] train-rmspe:0.087527  eval-rmspe:0.094716
+# [129] train-rmspe:0.087450  eval-rmspe:0.094641
+# [130] train-rmspe:0.086951  eval-rmspe:0.094645
+# [131] train-rmspe:0.086947  eval-rmspe:0.094633
 
 
 print("Train a XGBoost model")

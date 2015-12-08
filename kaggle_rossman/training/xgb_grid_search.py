@@ -17,7 +17,7 @@ def build_features(features, data):
     data.fillna(0, inplace=True)
     data.loc[data.Open.isnull(), 'Open'] = 1
     # Use some properties directly
-    features.extend(['CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
+    features.extend(['Store', 'CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
 
     # Label encode some features
     features.extend(['StoreType', 'Assortment', 'StateHoliday'])
@@ -103,32 +103,33 @@ dtrain = xgb.DMatrix(X_train[features], y_train)
 dvalid = xgb.DMatrix(X_valid[features], y_valid)
 watchlist = [(dtrain, 'train'), (dvalid, 'eval')]
 
-def getError(maxDepth, num_round, eta):
+def getError(maxDepth, minChildWeight, eta):
     params = {"objective": "reg:linear",
           "booster" : "gbtree",
           "eta": eta,
           "max_depth": maxDepth,
           "subsample": 1.0,
-          "colsample_bytree": 0.3,
-          "min_child_weight": 1.05,
+          "colsample_bytree": 0.40,
+          "min_child_weight": minChildWeight,
           "silent": 1,
           "seed": 1337
           }
-    gbm = xgb.train(params, dtrain, num_round, evals=watchlist, \
+
+    gbm = xgb.train(params, dtrain, 300, evals=watchlist, \
         early_stopping_rounds=25, feval=rmspe_xg, verbose_eval=True)
     yhat = gbm.predict(xgb.DMatrix(X_valid[features]))
     error = rmspe(X_valid.Sales.values, np.expm1(yhat))
     return error
 
-maxDepths = [11, 13, 14]
-rounds = [300]
-etas = [0.3]
+maxDepths = [11]
+minChildWeights = [1.05, 1.15, 1.20, 1.25]
+etas = [0.25, 0.30, 0.35]
 results = {}
 
 for maxDepth in maxDepths:
-    for num_round in rounds:
+    for minChildWeight in minChildWeights:
         for eta in etas:
-            print "currently: maxdepth->" + str(maxDepth) + " num_round->" + str(num_round) + " eta->" + str(eta)
-            results[str(maxDepth) + "_" + str(num_round) + "_" + str(eta)] = getError(maxDepth, num_round, eta) 
+            print "\n\ncurrently: maxdepth->" + str(maxDepth) + " minChildWeights->" + str(minChildWeight) + " eta->" + str(eta)
+            results[str(maxDepth) + "_" + str(minChildWeight) + "_" + str(eta)] = getError(maxDepth, minChildWeight, eta) 
 
 print results
