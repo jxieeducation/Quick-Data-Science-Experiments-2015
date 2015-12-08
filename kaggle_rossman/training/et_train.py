@@ -97,11 +97,12 @@ print(features)
 
 print('training data processed')
 
-X_train, X_valid = train_test_split(train, test_size=0.012, random_state=10)
+X_train, X_valid = train_test_split(train, test_size=0.025, random_state=1337)
 y_train = np.log1p(X_train.Sales)
 y_valid = np.log1p(X_valid.Sales)
 
 print('starting ExtraTree')
+features = [f for f in features if f != 'Store']
 clf = ExtraTreesRegressor(n_jobs=-1, verbose=3, n_estimators=100, random_state=1337)
 clf.fit(X_train[features].values, y_train)
 
@@ -117,3 +118,5 @@ result = pd.DataFrame({"Id": test["Id"], 'Sales': np.expm1(test_probs)})
 result.to_csv("../data/et_submission.csv", index=False)
 
 # 0.104902
+# store - 0.105439
+# without - 0.105070
