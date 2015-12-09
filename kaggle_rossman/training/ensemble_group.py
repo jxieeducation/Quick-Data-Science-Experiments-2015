@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 
-xgb_w = 0.83
-rf_w = 0.05
-et_w = 0.12
+xgb_w = 0.91
+rf_w = 0
+et_w = 0.09
 
 xgb_pred = pd.read_csv("../data/xgboost_submission.csv")
 rf_pred = pd.read_csv("../data/rf_submission.csv")

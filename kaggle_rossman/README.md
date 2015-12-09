@@ -14,3 +14,5 @@ https://www.kaggle.com/c/rossmann-store-sales/forums/t/17468/question-xgboost-an
 
 https://www.kaggle.com/c/rossmann-store-sales/forums/t/17387/inputs-on-feature-engineering-for-store-prediction-regression-challenges/99170
 http://www.slideshare.net/odsc/owen-zhangopen-sourcetoolsanddscompetitions1
+https://www.kaggle.com/c/rossmann-store-sales/forums/t/17471/loosing-about-1-on-lb-vs-local-5-fold-cv
+

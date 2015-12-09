@@ -18,7 +18,7 @@ def build_features(features, data):
     data.fillna(0, inplace=True)
     data.loc[data.Open.isnull(), 'Open'] = 1
     # Use some properties directly
-    features.extend(['Store','CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
+    features.extend(['Store', 'CompetitionDistance', 'Promo', 'Promo2', 'SchoolHoliday'])
 
     # Label encode some features
     features.extend(['StoreType', 'Assortment', 'StateHoliday'])
@@ -34,8 +34,6 @@ def build_features(features, data):
     data['DayOfWeek'] = data.Date.dt.dayofweek
     data['WeekOfYear'] = data.Date.dt.weekofyear
 
-    # CompetionOpen en PromoOpen from https://www.kaggle.com/ananya77041/rossmann-store-sales/randomforestpython/code
-    # Calculate time competition open time in months
     features.append('CompetitionOpen')
     data['CompetitionOpen'] = 12 * (data.Year - data.CompetitionOpenSinceYear) + \
         (data.Month - data.CompetitionOpenSinceMonth)
@@ -47,16 +45,24 @@ def build_features(features, data):
     data.loc[data.Promo2SinceYear == 0, 'PromoOpen'] = 0
 
     # Indicate that sales on that day are in promo interval
-    features.append('IsPromoMonth')
+    features.extend(['IsPromoMonth', 'IsPromoNextMonth', 'IsPromoLastMonth'])
     month2str = {1:'Jan', 2:'Feb', 3:'Mar', 4:'Apr', 5:'May', 6:'Jun', \
              7:'Jul', 8:'Aug', 9:'Sept', 10:'Oct', 11:'Nov', 12:'Dec'}
     data['monthStr'] = data.Month.map(month2str)
+    data['nextMonthStr'] = data.Month.apply(lambda x: x + 1).map(month2str)
+    data['lastMonthStr'] = data.Month.apply(lambda x: x - 1).map(month2str)
+    
     data.loc[data.PromoInterval == 0, 'PromoInterval'] = ''
     data['IsPromoMonth'] = 0
+    data['IsPromoNextMonth'] = 0
+    data['IsPromoLastMonth'] = 0
+    
     for interval in data.PromoInterval.unique():
         if interval != '':
             for month in interval.split(','):
                 data.loc[(data.monthStr == month) & (data.PromoInterval == interval), 'IsPromoMonth'] = 1
+                data.loc[(data.nextMonthStr == month) & (data.PromoInterval == interval), 'IsPromoNextMonth'] = 1
+                data.loc[(data.lastMonthStr == month) & (data.PromoInterval == interval), 'IsPromoLastMonth'] = 1
 
     return data
 
@@ -72,7 +78,7 @@ types = {'CompetitionOpenSinceYear': np.dtype(int),
          'PromoInterval': np.dtype(str)}
 train = pd.read_csv("../data/train.csv", parse_dates=[2], dtype=types)
 test = pd.read_csv("../data/test.csv", parse_dates=[3], dtype=types)
-store = pd.read_csv("../data/store_features.pd")
+store = pd.read_csv("../data/store_features_new.pd")
 for feature in store.columns:
     if '_' in feature:
         features += [feature]
@@ -95,16 +101,19 @@ build_features(features, train)
 build_features([], test)
 print(features)
 
-print('training data processed')
-
-X_train, X_valid = train_test_split(train, test_size=0.025, random_state=1337)
+X_valid = train[train.Date >= '2015-06-15']
+X_train = train[train.Date < '2015-06-15']
+print X_train.shape, X_valid.shape
 y_train = np.log1p(X_train.Sales)
 y_valid = np.log1p(X_valid.Sales)
 
 print('starting RF')
-features = [f for f in features if f != 'Store']
-clf = RandomForestRegressor(n_jobs=-1, verbose=3, n_estimators=100, random_state=1337)
+# features = [f for f in features if f != 'Store']
+clf = RandomForestRegressor(n_jobs=-1, verbose=3, n_estimators=20, random_state=1337, max_features='sqrt', min_samples_split=2)
 clf.fit(X_train[features].values, y_train)
+
+print "Features sorted by their score:"
+print sorted(zip(map(lambda x: round(x, 4), clf.feature_importances_), features), reverse=True)
 
 print("Validating")
 yhat = clf.predict(X_valid[features].values)
@@ -116,6 +125,3 @@ print("Make predictions on the test set")
 test_probs = clf.predict(test[features])
 result = pd.DataFrame({"Id": test["Id"], 'Sales': np.expm1(test_probs)})
 result.to_csv("../data/rf_submission.csv", index=False)
-
-# store - 0.105562
-# without - 0.105431
