@@ -17,4 +17,3 @@ qplot(data=facebook, x=likes_received) + scale_x_discrete(breaks=seq(0, 0.5, 0.0
 qplot(data=facebook, x=likes + 1) + scale_x_log10()
 
 qplot(geom="boxplot", data=subset(facebook, !is.na(gender)), x=gender, y=age)
-
