@@ -21,8 +21,7 @@ train$Child <- 0
 train$Child[train$Age < 18] <- 1
 aggregate(Survived ~ Child + Sex, data=train, FUN=sum)
 
-
-
+qplot(Fare, data=train, color=Survived) # holy fare = survived 
 ggplot(aes(x=Fare), data=train) + geom_histogram() + xlim(0, 300) + scale_x_continuous(seq(0, 300, 10))
 cor.test(train$Fare, train$Survived, method='pearson') #0.2573065
 ggplot(aes(x=log(Fare), y=Survived), data=train) + geom_point()
@@ -49,6 +48,8 @@ fit <- rpart(Survived ~ Pclass + Sex + Age + SibSp + Parch + Fare + Embarked, da
 fancyRpartPlot(fit)
 
 ### 
+ggplot(aes(x=Age), data=train) + geom_bar() + facet_wrap(~Survived)
+ggplot(aes(x=Fare), data=train) + geom_bar() + facet_wrap(~Survived) + scale_x_continuous(breaks=seq(0, 300, 10))
 
 train$Title <- sapply(train$Name, FUN=function(x) {strsplit(x, split='[,.]')[[1]][2]})
 train$Title <- sub(' ', '', train$Title)
@@ -56,5 +57,5 @@ train$Title[train$Title %in% c('Mme', 'Mlle')] <- 'Mlle'
 train$Title[train$Title %in% c('Capt', 'Don', 'Major', 'Sir')] <- 'Sir'
 train$Title[train$Title %in% c('Dona', 'Lady', 'the Countess', 'Jonkheer')] <- 'Lady'
 train$Title <- factor(train$Title)
-
+ggplot(aes(x=Title, y=Age), data=train) + geom_boxplot() # as hinted on kaggle, the age trick helps extrapolate things
 
