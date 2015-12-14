@@ -15,3 +15,4 @@ def parseXML(msg):
 
 messages = twitch.map(parseXML).filter(lambda msgDict: msgDict is not '')
 messages.saveAsTextFile('hdfs://localhost:9000/data/twitch_msg')
+a
