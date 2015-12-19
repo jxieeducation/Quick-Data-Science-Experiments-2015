@@ -8,5 +8,6 @@ lines = f.read().split('\n')
 corpus = [line.split() for line in lines]
 
 print "starting word2vec"
-model = Word2Vec(corpus, seed=1337, min_count=5, workers=4, window=20)
+model = Word2Vec(corpus, seed=1337, min_count=5, workers=4, window=20, iter=10)
 model.save('data/app_5_min.mod')
+
