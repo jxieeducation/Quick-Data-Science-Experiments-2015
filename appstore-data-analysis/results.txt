@@ -1,8 +1,0 @@
->>> recommando(positive=['com.facebook.katana', 'picture'],negative=[])
->>> recommando(positive=['anime', 'wallpaper'],negative=[])
->>> recommando(positive=['com.outfit7.talkingtom', 'son'],negative=[])
-recommando(positive=['com.google.android.apps.translate', 'chinese'],negative=[])
-
-
-
-
